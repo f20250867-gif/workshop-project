@@ -1,3 +1,11 @@
 from django.urls import path
+from .views import like_song, unlike_song, check_like, liked_songs, play_song, recently_played
 
-urlpatterns = []
+urlpatterns = [
+    path("like/<int:song_id>/", like_song, name="like_song"),
+    path("unlike/<int:song_id>/", unlike_song, name="unlike_song"),
+    path("like/<int:song_id>/check/", check_like, name="check_like"),
+    path("liked-songs/", liked_songs, name="liked_songs"),
+    path("play/<int:song_id>/", play_song, name="play_song"),
+    path("recently-played/", recently_played, name="recently_played"),
+]
