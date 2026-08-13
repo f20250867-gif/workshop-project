@@ -121,6 +121,7 @@ class RecentlyPlayed(models.Model):
 
     class Meta:
         ordering = ["-played_at"]
+        verbose_name_plural = "Recently Played"
         unique_together = (
             "user",
             "music",
