@@ -1,8 +1,21 @@
+
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+from .models import Music, RecentlyPlayed, Playlist
 
-from .models import Music, RecentlyPlayed
+# Create your views here.
+class CreateplaylistView(CreateView):
+    model = Playlist
+    fields = ['name', 'description', 'music']
+    template_name = 'music/create_playlist.html'
+    success_url = reverse_lazy('create_playlist') 
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 @login_required
 def like_song(request, song_id):
@@ -85,3 +98,9 @@ def recently_played(request):
             for item in songs
         ]
     }, json_dumps_params={"indent": 4})
+
+
+
+
+
+
