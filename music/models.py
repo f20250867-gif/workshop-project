@@ -6,7 +6,7 @@ from django.db import models
 class Artist(models.Model):
     name = models.CharField(max_length=100, unique=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
-    followers = models.ManyToManyField(User, related_name="following")
+    followers = models.ManyToManyField(User, related_name="following", blank=True)
     # ^ links an Artist profile to a login, so they can publish songs/albums
 
     def __str__(self):
