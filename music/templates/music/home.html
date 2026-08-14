@@ -1,0 +1,40 @@
+{% extends 'music/base.html' %}
+
+{% block title %}Browse{% endblock %}
+
+{% block content %}
+<div class="home-header">
+    <div>
+        <h1>Browse Songs</h1>
+        <p class="subtitle">{{ songs|length }} track{{ songs|length|pluralize }} available</p>
+    </div>
+    <a href="{% url 'create_playlist' %}" class="btn btn-primary">+ New Playlist</a>
+</div>
+<div>
+    <form method="get" class="d-flex">
+        <div class="input-group input-group-sm">
+            <!-- Preserves the user's search text after page reload -->
+            <input type="text" name="music" class="form-control" placeholder="Search songs..."
+                value="">
+            <button class="btn btn-outline-secondary" type="submit">Search</button>
+        </div>
+    </form>
+</div>
+{% if music_list %}
+<div class="song-grid">
+    {% for music in music_list %}
+    <div class="card song-card">
+        <div class="song-art">🎵</div>
+        <h3 class="song-title">{{ music.title }}</h3>
+        <!-- <p class="song-artist">{{ music.artist }}</p>
+                <p class="song-meta">{{ music.album.title }} · {{ music.genre }}</p> -->
+        {% if music.like_count %}
+        <p class="song-likes">♥ {{ music.like_count }}</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty-state">No songs yet — add some via the admin panel to get started.</p>
+{% endif %}
+{% endblock %}
