@@ -1,13 +1,12 @@
-from django.shortcuts import render
 import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
-from .models import Artist, Music, Album
-from django.views.decorators.csrf import csrf_exempt
+from .models import Artist, Music, Album, RecentlyPlayed
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
-@csrf_exempt
 @require_POST
 def create_album(request):
     try :
@@ -50,7 +49,6 @@ def create_album(request):
         status = 201
     )
 
-@csrf_exempt   
 @require_http_methods(["DELETE"])
 def delete_album(request, album_id):
     try:
@@ -67,7 +65,6 @@ def delete_album(request, album_id):
         status=200
     )
 
-@csrf_exempt   
 @require_POST
 def create_song(request):
     try:
@@ -121,8 +118,7 @@ def create_song(request):
         },
         status=201
     )
-
-@csrf_exempt   
+  
 @require_http_methods(["DELETE"])
 def delete_song(request, song_id):
     try:
@@ -138,3 +134,85 @@ def delete_song(request, song_id):
         {"message": "Song deleted successfully"},
         status=200
     )
+
+@login_required
+def like_song(request, song_id):
+    song = get_object_or_404(Music, id=song_id)
+
+    song.likes.add(request.user)
+
+    return JsonResponse({
+        "message": "Song liked successfully"
+    })
+
+
+@login_required
+def unlike_song(request, song_id):
+    song = get_object_or_404(Music, id=song_id)
+
+    song.likes.remove(request.user)
+
+    return JsonResponse({
+        "message": "Song unliked successfully"
+    })
+
+
+@login_required
+def check_like(request, song_id):
+    song = get_object_or_404(Music, id=song_id)
+
+    liked = song.likes.filter(id=request.user.id).exists()
+
+    return JsonResponse({
+        "liked": liked
+    })
+
+
+@login_required
+def liked_songs(request):
+    songs = request.user.liked_music.all()
+
+    return JsonResponse({
+        "liked_songs": [
+            {
+                "id": song.id,
+                "title": song.title,
+                "artist": str(song.artist),
+            }
+            for song in songs
+        ]
+    })
+
+
+@login_required
+def play_song(request, song_id):
+    song = get_object_or_404(Music, id=song_id)
+
+    recently_played, created = RecentlyPlayed.objects.get_or_create(
+        user=request.user,
+        music=song
+    )
+
+    if not created:
+        recently_played.save()
+
+    return JsonResponse({
+        "message": "Song played successfully"
+    })
+
+
+@login_required
+def recently_played(request):
+    songs = RecentlyPlayed.objects.filter(user=request.user)
+
+    return JsonResponse({
+        "recently_played": [
+            {
+                "id": item.music.id,
+                "title": item.music.title,
+                "artist": str(item.music.artist),
+                "played_at": item.played_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            for item in songs
+        ]
+    }, json_dumps_params={"indent": 4})
