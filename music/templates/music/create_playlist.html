@@ -1,0 +1,40 @@
+{% extends 'music/base.html' %}
+
+{% block title %}Create Playlist{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Create New Playlist</h1>
+    <p class="subtitle">Give it a name and description — add songs now or later.</p>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="field">
+            <label for="{{ form.name.id_for_label }}">Playlist Name</label>
+            {{ form.name }}
+            {% for error in form.name.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.description.id_for_label }}">Description <span class="optional">(optional)</span></label>
+            {{ form.description }}
+            {% for error in form.description.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.music.id_for_label }}">Songs <span class="optional">(optional — hold Ctrl/Cmd to select multiple)</span></label>
+            {{ form.music }}
+            {% for error in form.music.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-primary">Create Playlist</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

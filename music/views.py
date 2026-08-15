@@ -2,23 +2,55 @@
 import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
-from .models import Artist, Music, Album, RecentlyPlayed
-from django.shortcuts import get_object_or_404
+from .models import Artist, Music, Album, RecentlyPlayed, Playlist
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
+from django.template import context
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
-from .models import Music, RecentlyPlayed, Playlist
+from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
+
 
 # Create your views here.
-class CreateplaylistView(CreateView):
+def home(request):
+    music_list = Music.objects.all()
+    if request.method == "GET":
+        music_title = request.GET.get("music")
+        if music_title!= None:
+            music_list = Music.objects.filter(title__icontains=music_title)
+    context = {
+        'music_list': music_list 
+    }
+    return render(request, 'music/home.html', context)
+
+
+class CreatePlaylistView(CreateView):
     model = Playlist
     fields = ['name', 'description', 'music']
     template_name = 'music/create_playlist.html'
-    success_url = reverse_lazy('create_playlist') 
+    success_url = reverse_lazy('music-home') 
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
         return super().form_valid(form)
+    
+class UpdatePlaylistView(UpdateView):
+    model = Playlist
+    fields = ['name', 'description', 'music']
+    template_name = 'music/update_playlist.html'
+    success_url = reverse_lazy('music-home') 
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+class DeletePlaylistView(DeleteView):
+    model = Playlist
+    success_url = '/'
+
+class ArtistDetailView(DetailView):
+    model = Artist
+    template_name = 'music/artist_detail.html'
+    context_object_name = 'artist'
 
 @require_POST
 def create_album(request):
@@ -230,6 +262,18 @@ def recently_played(request):
         ]
     }, json_dumps_params={"indent": 4})
 
+def follow_unfollow(request, id):
+    if request.method != "POST":
+        return redirect('music-home')
+
+    artist = get_object_or_404(Artist, id=id)
+
+    if request.user in artist.followers.all():
+        artist.followers.remove(request.user)  
+    else:
+        artist.followers.add(request.user)
+
+    return redirect('artist-detail', pk=artist.id)
 
 
 

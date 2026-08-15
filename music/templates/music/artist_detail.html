@@ -1,0 +1,77 @@
+{% extends "music/base.html" %}
+
+{% block title %}{{ artist.name }} - GrooveBox{% endblock %}
+
+{% block content %}
+<div class="artist-header">
+    <h1>{{ artist.name }}</h1>
+    
+    <div class="artist-stats">
+        <div class="stat">
+            <span class="stat-number">{{ artist.followers.count }}</span>
+            <span class="stat-label">Followers</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number">{{ artist.music_set.count }}</span>
+            <span class="stat-label">Tracks</span>
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+        <form method="post" action="{% url 'follow_unfollow' id=artist.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="follow-btn">
+                {% if user in artist.followers.all %}
+                    Unfollow
+                {% else %}
+                    Follow
+                {% endif %}
+            </button>
+        </form>
+    {% else %}
+        <p><a href="{% url 'login' %}">Login to follow</a></p>
+    {% endif %}
+</div>
+
+<!-- Tracks Section -->
+{% if artist.music_set.all %}
+    <div class="section">
+        <h2>Tracks</h2>
+        <div class="music-grid">
+            {% for song in artist.music_set.all %}
+                <div class="music-card">
+                    <h3>{{ song.title }}</h3>
+                    <p><strong>Album:</strong> {{ song.album.title }}</p>
+                    <p><strong>Released:</strong> {{ song.release_date|date:"M d, Y" }}</p>
+                    <span class="genre-badge">{{ song.get_genre_display }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% else %}
+    <div class="section">
+        <p class="empty-message">This artist hasn't released any tracks yet.</p>
+    </div>
+{% endif %}
+
+<!-- Albums Section -->
+{% if artist.album_set.all %}
+    <div class="section">
+        <h2>Albums</h2>
+        <div class="music-grid">
+            {% for album in artist.album_set.all %}
+                <div class="music-card">
+                    <h3>{{ album.title }}</h3>
+                    <p><strong>Tracks:</strong> {{ album.music_set.count }}</p>
+                    <p><strong>Released:</strong> {{ album.release_date|date:"M d, Y" }}</p>
+                    <span class="genre-badge">{{ album.get_genre_display }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% else %}
+    <div class="section">
+        <p class="empty-message">This artist hasn't released any albums yet.</p>
+    </div>
+{% endif %}
+{% endblock %}

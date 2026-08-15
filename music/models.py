@@ -95,7 +95,7 @@ class Music(models.Model):
     album = models.ForeignKey(Album, on_delete=models.CASCADE)
     release_date = models.DateField(auto_now_add=True)
     genre = models.CharField(max_length=50, choices=Genre.choices)
-    likes = models.ManyToManyField(User, related_name="liked_music")
+    likes = models.ManyToManyField(User, related_name="liked_music", blank=True)
 
     def __str__(self):
         return f"{self.title} by {self.artist}"
