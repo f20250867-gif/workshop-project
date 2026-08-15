@@ -14,6 +14,7 @@
         <span class="nav-tag">backend workshop build</span>
         <span class="nav-auth">
             {% if user.is_authenticated %}
+                {% if user.artist %}<a href="{% url 'publisher_dashboard' %}">Publisher Dashboard</a> &middot;{% endif %}
                 {{ user.username }} &middot;
                 <form method="post" action="{% url 'logout' %}" style="display:inline;">
                     {% csrf_token %}
@@ -40,5 +41,14 @@
     <footer>
         <p>&copy; {% now "Y" %} GrooveBox</p>
     </footer>
+    <script>
+        document.addEventListener('play', function (e) {
+            if (e.target.tagName === 'AUDIO' && e.target.dataset.songId) {
+                fetch(`/play/${e.target.dataset.songId}/`);
+            }
+        }, true);
+        </script>
+        {% block extra_scripts %}{% endblock %}
+    </body>
 </body>
 </html>

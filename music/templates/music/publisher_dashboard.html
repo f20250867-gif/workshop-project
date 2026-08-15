@@ -1,0 +1,77 @@
+{% extends 'music/base.html' %}
+{% block title %}Publisher Dashboard{% endblock %}
+{% block content %}
+<div class="home-header">
+    <div>
+        <h1>{{ artist.name }}</h1>
+        <p class="subtitle">Your catalog</p>
+    </div>
+</div>
+
+<div class="dashboard-actions">
+    <a href="{% url 'upload_song' %}" class="btn btn-primary">+ Upload Song</a>
+    <a href="{% url 'create_album_page' %}" class="btn btn-outline-info">+ Create Album</a>
+</div>
+
+<h2>Albums</h2>
+{% if albums %}
+    {% for album in albums %}
+    <div class="catalog-row">
+        <div>
+            <div class="playlist-name">{{ album.title }}</div>
+            <div class="catalog-meta">{{ album.get_genre_display }} &middot; {{ album.music_set.count }} track{{ album.music_set.count|pluralize }}</div>
+        </div>
+        <button type="button" class="btn-delete delete-album-btn" data-album-id="{{ album.id }}">Delete</button>
+    </div>
+    {% endfor %}
+{% else %}
+    <p class="empty-message">No albums yet — create one before uploading songs.</p>
+{% endif %}
+
+<h2 style="margin-top:2rem;">Songs</h2>
+{% if songs %}
+    {% for song in songs %}
+    <div class="catalog-row">
+        <div>
+            <div class="playlist-name">{{ song.title }}</div>
+            <div class="catalog-meta">{{ song.album.title }} &middot; {{ song.get_genre_display }} &middot; {{ song.likes.count }} like{{ song.likes.count|pluralize }}</div>
+        </div>
+        <button type="button" class="btn-delete delete-song-btn" data-song-id="{{ song.id }}">Delete</button>
+    </div>
+    {% endfor %}
+{% else %}
+    <p class="empty-message">No songs yet.</p>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+document.querySelectorAll('.delete-album-btn').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+        if (!confirm('Delete this album and all its songs?')) return;
+        const res = await fetch(`/publisher/albums/${btn.dataset.albumId}/`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        if (res.ok) btn.closest('.catalog-row').remove();
+    });
+});
+
+document.querySelectorAll('.delete-song-btn').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+        if (!confirm('Delete this song?')) return;
+        const res = await fetch(`/publisher/songs/${btn.dataset.songId}/`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        if (res.ok) btn.closest('.catalog-row').remove();
+    });
+});
+</script>
+{% endblock %}

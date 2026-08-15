@@ -1,0 +1,55 @@
+{% extends 'music/base.html' %}
+
+{% block title %}{{ playlist.name }}{% endblock %}
+
+{% block content %}
+<div class="home-header">
+    <div>
+        <h1>{{ playlist.name }}</h1>
+        {% if playlist.description %}
+            <p class="subtitle">{{ playlist.description }}</p>
+        {% else %}
+            <p class="subtitle">{{ playlist.music.count }} track{{ playlist.music.count|pluralize }}</p>
+        {% endif %}
+    </div>
+    <div class="dashboard-actions">
+        <a href="{% url 'update_playlist' pk=playlist.pk %}" class="btn btn-outline-info">Edit</a>
+        <a href="{% url 'delete_playlist' pk=playlist.pk %}" class="btn btn-outline-danger">Delete</a>
+    </div>
+</div>
+
+{% if playlist.music.all %}
+<div class="tracklist playlist-tracklist">
+    {% for music in playlist.music.all %}
+    <div class="track-row playlist-track-row">
+        <span class="track-num">{{ forloop.counter|stringformat:"02d" }}</span>
+        <span class="track-disc"></span>
+        <div class="track-main">
+            <div class="track-title">{{ music.title }}</div>
+            <div class="track-sub">
+                <a href="{% url 'artist-detail' pk=music.artist.id %}">{{ music.artist }}</a>
+                &middot; {{ music.album.title }}
+            </div>
+        </div>
+        <div class="track-meta">
+            <span>{{ music.get_genre_display }}</span>
+        </div>
+        <div class="track-audio">
+            {% if music.audio %}
+                <audio controls preload="none" data-song-id="{{ music.id }}" src="{{ music.audio.url }}"></audio>
+            {% else %}
+                <span class="track-no-audio">no audio</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state playlist-empty">
+    <p>This playlist is empty.</p>
+    <a href="{% url 'update_playlist' pk=playlist.pk %}" class="btn btn-primary">Add songs</a>
+</div>
+{% endif %}
+
+<p class="back-link"><a href="{% url 'music-home' %}">&larr; Back to Browse</a></p>
+{% endblock %}

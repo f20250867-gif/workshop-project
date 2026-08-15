@@ -96,6 +96,7 @@ class Music(models.Model):
     release_date = models.DateField(auto_now_add=True)
     genre = models.CharField(max_length=50, choices=Genre.choices)
     likes = models.ManyToManyField(User, related_name="liked_music", blank=True)
+    audio = models.FileField(upload_to='songs/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.title} by {self.artist}"
@@ -133,4 +134,3 @@ class RecentlyPlayed(models.Model):
 
     def __str__(self):
         return f"{self.user} played {self.music}"
-
