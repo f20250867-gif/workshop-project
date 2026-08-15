@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = str(env.get("SECRET_KEY", 'django-insecure-0*g0^xl=+_j)kd46e55u#23a*s(vm(hy01r+!r&vc*jyk-cn_#'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(env.get("DEBUG", "True") == True)
+DEBUG = bool(env.get("DEBUG", "True") == "True")
 
 ALLOWED_HOSTS = [ host for host in str(env.get("ALLOWED_HOSTS", "")).split("|") if host ]
 
@@ -122,6 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 # Email
