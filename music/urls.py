@@ -1,6 +1,6 @@
 from django.contrib.admin import views
 from django.urls import path
-from .views import home, CreatePlaylistView,  UpdatePlaylistView,DeletePlaylistView, like_song, unlike_song, check_like, liked_songs, play_song, recently_played, ArtistDetailView, follow_unfollow
+from .views import home, SignUpView, CreatePlaylistView,  UpdatePlaylistView,DeletePlaylistView, like_song, unlike_song, check_like, liked_songs, play_song, recently_played, ArtistDetailView, follow_unfollow
 from .views import (like_song,
                     unlike_song,
                     check_like,
@@ -15,6 +15,7 @@ from .views import (like_song,
 
 urlpatterns = [
     path("", home, name="music-home"),
+    path("signup/", SignUpView.as_view(), name="signup"),
     path("like/<int:song_id>/", like_song, name="like_song"),
     path("unlike/<int:song_id>/", unlike_song, name="unlike_song"),
     path("like/<int:song_id>/check/", check_like, name="check_like"),

@@ -12,6 +12,17 @@
     <nav>
         <span class="nav-brand">GrooveBox</span>
         <span class="nav-tag">backend workshop build</span>
+        <span class="nav-auth">
+            {% if user.is_authenticated %}
+                {{ user.username }} &middot;
+                <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link-btn">Log Out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Log In</a> &middot; <a href="{% url 'signup' %}">Sign Up</a>
+            {% endif %}
+        </span>
     </nav>
 
     <main>
