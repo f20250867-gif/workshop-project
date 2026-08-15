@@ -1,0 +1,46 @@
+{% extends 'music/base.html' %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Create Account</h1>
+    <p class="subtitle">Sign up to like songs, build playlists and follow artists.</p>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="field">
+            <label for="{{ form.username.id_for_label }}">Username</label>
+            {{ form.username }}
+            {% for error in form.username.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+            {% if form.username.help_text %}<p class="subtitle">{{ form.username.help_text }}</p>{% endif %}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.password1.id_for_label }}">Password</label>
+            {{ form.password1 }}
+            {% for error in form.password1.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+            {% if form.password1.help_text %}<p class="subtitle">{{ form.password1.help_text }}</p>{% endif %}
+        </div>
+
+        <div class="field">
+            <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+            {{ form.password2 }}
+            {% for error in form.password2.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+        </div>
+    </form>
+
+    <p class="subtitle" style="margin-top: 1.5rem;">
+        Already have an account? <a href="{% url 'login' %}">Log in</a>
+    </p>
+</div>
+{% endblock %}

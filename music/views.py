@@ -5,10 +5,64 @@ from django.views.decorators.http import require_POST, require_http_methods
 from .models import Artist, Music, Album, RecentlyPlayed, Playlist
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.template import context
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 
+
+# Create your views here.
+def home(request):
+    music_list = Music.objects.all()
+    if request.method == "GET":
+        music_title = request.GET.get("music")
+        if music_title!= None:
+            music_list = Music.objects.filter(title__icontains=music_title)
+    context = {
+        'music_list': music_list 
+    }
+    return render(request, 'music/home.html', context)
+
+
+class SignUpView(CreateView):
+    form_class = UserCreationForm
+    template_name = 'registration/signup.html'
+    success_url = reverse_lazy('login')
+
+
+class CreatePlaylistView(LoginRequiredMixin, CreateView):
+    model = Playlist
+    fields = ['name', 'description', 'music']
+    template_name = 'music/create_playlist.html'
+    success_url = reverse_lazy('music-home')
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+class UpdatePlaylistView(LoginRequiredMixin, UpdateView):
+    model = Playlist
+    fields = ['name', 'description', 'music']
+    template_name = 'music/update_playlist.html'
+    success_url = reverse_lazy('music-home')
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+class DeletePlaylistView(LoginRequiredMixin, DeleteView):
+    model = Playlist
+    success_url = '/'
+
+class ArtistDetailView(DetailView):
+    model = Artist
+    template_name = 'music/artist_detail.html'
+    context_object_name = 'artist'
+from django.views.decorators.http import require_POST, require_http_methods
+from .models import Artist, Music, Album, RecentlyPlayed
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def home(request):
@@ -52,6 +106,7 @@ class ArtistDetailView(DetailView):
     template_name = 'music/artist_detail.html'
     context_object_name = 'artist'
 
+@login_required
 @require_POST
 def create_album(request):
     try :
@@ -94,6 +149,7 @@ def create_album(request):
         status = 201
     )
 
+@login_required
 @require_http_methods(["DELETE"])
 def delete_album(request, album_id):
     try:
@@ -110,6 +166,7 @@ def delete_album(request, album_id):
         status=200
     )
 
+@login_required
 @require_POST
 def create_song(request):
     try:
@@ -164,6 +221,7 @@ def create_song(request):
         status=201
     )
   
+@login_required
 @require_http_methods(["DELETE"])
 def delete_song(request, song_id):
     try:
@@ -262,6 +320,7 @@ def recently_played(request):
         ]
     }, json_dumps_params={"indent": 4})
 
+@login_required
 def follow_unfollow(request, id):
     if request.method != "POST":
         return redirect('music-home')
