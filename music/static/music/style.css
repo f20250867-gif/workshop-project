@@ -140,6 +140,13 @@ footer { text-align: center; padding: 1.5rem; color: var(--text-secondary); font
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
+    place-items: center;
+}
+
+.song-card-link {
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
 }
 
 .song-card {
@@ -311,4 +318,111 @@ footer { text-align: center; padding: 1.5rem; color: var(--text-secondary); font
     margin-top: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.02em;
+}
+
+/* Music Detail Page */
+.music-detail-header {
+    background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+    color: #000;
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+.music-art {
+    font-size: 5rem;
+    width: 120px;
+    height: 120px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.music-info {
+    flex: 1;
+}
+.music-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+.music-artist {
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+}
+.music-artist a {
+    color: #000;
+    text-decoration: none;
+    font-weight: 600;
+}
+.music-artist a:hover {
+    text-decoration: underline;
+}
+.music-album {
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+.music-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+.release-date {
+    color: rgba(0, 0, 0, 0.8);
+}
+.music-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+.btn-like {
+    background: #000;
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 500px;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-like:hover {
+    background: #333;
+    transform: scale(1.05);
+}
+.btn-like.liked {
+    background: #fff;
+    color: #000;
+}
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+}
+
+/* Album Card */
+.album-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+.album-detail p {
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+.album-detail p strong {
+    color: var(--accent);
+}
+.album-detail a {
+    color: var(--accent);
+    text-decoration: none;
+}
+.album-detail a:hover {
+    text-decoration: underline;
 }

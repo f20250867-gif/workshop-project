@@ -21,15 +21,17 @@
 {% if music_list %}
 <div class="song-grid">
     {% for music in music_list %}
-    <div class="song-card">
-        <div class="song-art">🎵</div>
-        <h3 class="song-title">{{ music.title }}</h3>
-        <p class="song-artist">{{ music.artist }}</p>
-        <p class="song-meta">{{ music.album.title }} · {{ music.get_genre_display }}</p>
-        {% if music.likes.count %}
-        <p class="song-likes">♥ {{ music.likes.count }} likes</p>
-        {% endif %}
-    </div>
+    <a href="{% url 'music-detail' music.id %}" class="song-card-link">
+        <div class="song-card">
+            <div class="song-art">🎵</div>
+            <h3 class="song-title">{{ music.title }}</h3>
+            <p class="song-artist">{{ music.artist }}</p>
+            <p class="song-meta">{{ music.album.title }} · {{ music.get_genre_display }}</p>
+            {% if music.likes.count %}
+            <p class="song-likes">♥ {{ music.likes.count }} likes</p>
+            {% endif %}
+        </div>
+    </a>
     {% endfor %}
 </div>
 {% else %}

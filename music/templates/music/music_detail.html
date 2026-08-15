@@ -1,0 +1,141 @@
+{% extends "music/base.html" %}
+
+{% block title %}{{ music.title }} - GrooveBox{% endblock %}
+
+{% block content %}
+<div class="music-detail-header">
+    <div class="music-art">🎵</div>
+    <div class="music-info">
+        <h1 class="music-title">{{ music.title }}</h1>
+        <p class="music-artist">
+            <a href="{% url 'artist-detail' music.artist.id %}">{{ music.artist }}</a>
+        </p>
+        <p class="music-album">{{ music.album.title }}</p>
+        <p class="music-meta">
+            <span class="genre-badge">{{ music.get_genre_display }}</span>
+            <span class="release-date">Released: {{ music.release_date|date:"M d, Y" }}</span>
+        </p>
+        <div class="music-actions">
+            {% if user.is_authenticated %}
+                <button class="btn btn-like" id="likeBtn" onclick="toggleLike()">
+                    ♥ <span id="likeCount">{{ music.likes.count }}</span> Like
+                </button>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">Login to Like</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Album Info -->
+<div class="section">
+    <h2>Album Information</h2>
+    <div class="album-card">
+        <div class="album-detail">
+            <p><strong>Album Title:</strong> {{ music.album.title }}</p>
+            <p><strong>Artist:</strong> <a href="{% url 'artist-detail' music.album.artist.id %}">{{ music.album.artist }}</a></p>
+            <p><strong>Genre:</strong> {{ music.album.get_genre_display }}</p>
+            <p><strong>Release Date:</strong> {{ music.album.release_date|date:"M d, Y" }}</p>
+            <p><strong>Total Tracks:</strong> {{ music.album.music_set.count }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Other Tracks from Album -->
+{% if music.album.music_set.all.count > 1 %}
+<div class="section">
+    <h2>Other Tracks from This Album</h2>
+    <div class="music-grid">
+        {% for track in music.album.music_set.all %}
+            {% if track.id != music.id %}
+            <div class="music-card">
+                <div class="song-art">🎵</div>
+                <h3 class="song-title">{{ track.title }}</h3>
+                <p class="song-meta">{{ track.get_genre_display }}</p>
+                <p class="song-likes">♥ {{ track.likes.count }} likes</p>
+                <a href="{% url 'music-detail' track.id %}" class="btn btn-small">View</a>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Artist Other Tracks -->
+<div class="section">
+    <h2>More from {{ music.artist.name }}</h2>
+    <div class="music-grid">
+        {% for track in music.artist.music_set.all|slice:":6" %}
+            {% if track.id != music.id %}
+            <div class="music-card">
+                <div class="song-art">🎵</div>
+                <h3 class="song-title">{{ track.title }}</h3>
+                <p class="song-album">{{ track.album.title }}</p>
+                <p class="song-likes">♥ {{ track.likes.count }} likes</p>
+                <a href="{% url 'music-detail' track.id %}" class="btn btn-small">Play</a>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function toggleLike() {
+        const musicId = {{ music.id }};
+        const btn = document.getElementById('likeBtn');
+        const likeCountSpan = document.getElementById('likeCount');
+        
+        // Determine if already liked
+        const isLiked = btn.classList.contains('liked');
+        const endpoint = isLiked ? `/unlike/${musicId}/` : `/like/${musicId}/`;
+        
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                btn.classList.toggle('liked');
+                // Update like count (you may need to fetch fresh count from server)
+                const currentCount = parseInt(likeCountSpan.textContent);
+                likeCountSpan.textContent = isLiked ? currentCount - 1 : currentCount + 1;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Set initial button state
+    window.addEventListener('load', () => {
+        const btn = document.getElementById('likeBtn');
+        const musicId = {{ music.id }};
+        
+        // Check if user has liked this song
+        fetch(`/like/${musicId}/check/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.liked) {
+                    btn.classList.add('liked');
+                }
+            });
+    });
+</script>
+{% endblock %}
