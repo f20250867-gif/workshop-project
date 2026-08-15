@@ -6,7 +6,7 @@ from django.db import models
 class Artist(models.Model):
     name = models.CharField(max_length=100, unique=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
-    followers = models.ManyToManyField(User, related_name="following")
+    followers = models.ManyToManyField(User, related_name="following", blank=True)
     # ^ links an Artist profile to a login, so they can publish songs/albums
 
     def __str__(self):
@@ -95,17 +95,16 @@ class Music(models.Model):
     album = models.ForeignKey(Album, on_delete=models.CASCADE)
     release_date = models.DateField(auto_now_add=True)
     genre = models.CharField(max_length=50, choices=Genre.choices)
-    likes = models.ManyToManyField(User, related_name="liked_music")
+    likes = models.ManyToManyField(User, related_name="liked_music", blank=True)
 
     def __str__(self):
         return f"{self.title} by {self.artist}"
-
 
 class Playlist(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="playlists")
-    music = models.ManyToManyField(Music, related_name="playlists")
+    music = models.ManyToManyField(Music, related_name="playlists", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
