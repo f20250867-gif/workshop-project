@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Music, Album, Artist, Playlist, RecentlyPlayed
 
+from .models import Album, Artist, Music, Playlist, RecentlyPlayed
 
 # Register your models here.
 
@@ -12,4 +12,3 @@ admin.site.register(Playlist)
 @admin.register(RecentlyPlayed)
 class RecentlyPlayedAdmin(admin.ModelAdmin):
     list_display = ("user", "music", "played_at")
-

@@ -1,0 +1,30 @@
+{% extends 'music/base.html' %}
+
+{% block title %}Upload Song{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Upload Song</h1>
+    <p class="subtitle">Publishing as {{ request.user.artist.name }}.</p>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        {% for field in form %}
+        <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+
+        <div class="actions">
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

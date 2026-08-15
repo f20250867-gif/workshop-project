@@ -6,35 +6,159 @@
 <div class="home-header">
     <div>
         <h1>Browse Songs</h1>
-        <p class="subtitle">{{ music_list|length }} track{{ music_list|length|pluralize }} available</p>
+        <p class="subtitle">{{ music_list|length }} track{{ music_list|length|pluralize }} on the shelf</p>
     </div>
     <a href="{% url 'create_playlist' %}" class="btn btn-primary">+ New Playlist</a>
 </div>
 
 <div class="search-container">
     <form method="get" class="search-form">
-        <input type="text" name="music" class="search-input" placeholder="Search songs...">
+        <input type="text" name="music" class="search-input" placeholder="Search songs..." value="{{ music_query }}">
+        <input type="text" name="album" class="search-input" placeholder="Search albums..." value="{{ album_query }}">
+        <input type="text" name="artist" class="search-input" placeholder="Search artists..." value="{{ artist_query }}">
         <button type="submit" class="btn-search">Search</button>
     </form>
 </div>
 
+{% if artist_results is not None %}
+<div class="artist-results">
+    {% for artist in artist_results %}
+        <a href="{% url 'artist-detail' pk=artist.id %}" class="artist-chip">{{ artist.name }}</a>
+    {% empty %}
+        <p class="empty-message">No artists match "{{ artist_query }}".</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if request.user.is_authenticated %}
+<div class="my-playlists">
+    <h2>My Playlists</h2>
+    {% if my_playlists %}
+        {% for playlist in my_playlists %}
+        <div class="playlist-row">
+            <div>
+                <div class="playlist-name"><a href="{% url 'playlist-detail' pk=playlist.pk %}">{{ playlist.name }}</a></div>
+                {% if playlist.description %}<div class="playlist-desc">{{ playlist.description }}</div>{% endif %}
+            </div>
+            <div class="playlist-links">
+                <a href="{% url 'update_playlist' pk=playlist.pk %}">Edit</a>
+                <a href="{% url 'delete_playlist' pk=playlist.pk %}" class="danger">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty-message">You haven't made a playlist yet.</p>
+    {% endif %}
+</div>
+
+<div class="library-panel">
+    <div class="library-tabs">
+        <button type="button" class="tab-btn active" data-tab="liked">Liked Songs</button>
+        <button type="button" class="tab-btn" data-tab="recent">Recently Played</button>
+    </div>
+    <div class="library-content" id="library-content">
+        <p class="subtitle">Loading…</p>
+    </div>
+</div>
+{% endif %}
+
 {% if music_list %}
-<div class="song-grid">
+<div class="tracklist">
     {% for music in music_list %}
-    <a href="{% url 'music-detail' music.id %}" class="song-card-link">
-        <div class="song-card">
-            <div class="song-art">🎵</div>
-            <h3 class="song-title">{{ music.title }}</h3>
-            <p class="song-artist">{{ music.artist }}</p>
-            <p class="song-meta">{{ music.album.title }} · {{ music.get_genre_display }}</p>
-            {% if music.likes.count %}
-            <p class="song-likes">♥ {{ music.likes.count }} likes</p>
+    <div class="track-row">
+        <span class="track-num">{{ forloop.counter|stringformat:"02d" }}</span>
+        <span class="track-disc"></span>
+        <div class="track-main">
+            <div class="track-title">{{ music.title }}</div>
+            <div class="track-sub">
+                <a href="{% url 'artist-detail' pk=music.artist.id %}">{{ music.artist }}</a>
+                &middot; {{ music.album.title }}
+            </div>
+        </div>
+        <div class="track-meta">
+            <span>{{ music.get_genre_display }}</span>
+        </div>
+        <div class="track-audio">
+            {% if music.audio %}
+                <audio controls preload="none" data-song-id="{{ music.id }}" src="{{ music.audio.url }}"></audio>
+            {% else %}
+                <span class="track-no-audio">no audio</span>
             {% endif %}
         </div>
-    </a>
+        {% if request.user.is_authenticated %}
+        <button type="button" class="like-btn" data-song-id="{{ music.id }}"
+            data-liked="{% if request.user in music.likes.all %}true{% else %}false{% endif %}"
+            aria-label="Like {{ music.title }}">
+            <span class="like-icon">{% if request.user in music.likes.all %}&hearts;{% else %}&#9825;{% endif %}</span>
+            <span class="like-count">{{ music.likes.count }}</span>
+        </button>
+        {% elif music.likes.count %}
+        <span class="track-likes">&hearts; {{ music.likes.count }}</span>
+        {% endif %}
+    </div>
     {% endfor %}
 </div>
 {% else %}
-<p class="empty-state">No songs yet — add some via the admin panel to get started.</p>
+<p class="empty-state">No songs match — try a different search.</p>
 {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+document.querySelectorAll('.like-btn').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+        const songId = btn.dataset.songId;
+        const liked = btn.dataset.liked === 'true';
+        const res = await fetch(liked ? `/unlike/${songId}/` : `/like/${songId}/`);
+        if (!res.ok) return;
+        const nowLiked = !liked;
+        btn.dataset.liked = nowLiked.toString();
+        btn.querySelector('.like-icon').innerHTML = nowLiked ? '&hearts;' : '&#9825;';
+        const countEl = btn.querySelector('.like-count');
+        countEl.textContent = parseInt(countEl.textContent, 10) + (nowLiked ? 1 : -1);
+    });
+});
+
+const libraryContent = document.getElementById('library-content');
+
+async function loadLibrary(tab) {
+    if (!libraryContent) return;
+    libraryContent.innerHTML = '<p class="subtitle">Loading…</p>';
+    const res = await fetch(tab === 'liked' ? '/liked-songs/' : '/recently-played/');
+    if (!res.ok) {
+        libraryContent.innerHTML = '<p class="empty-message">Couldn\'t load that right now.</p>';
+        return;
+    }
+    const data = await res.json();
+    const items = tab === 'liked' ? data.liked_songs : data.recently_played;
+    if (!items.length) {
+        libraryContent.innerHTML = '<p class="empty-message">Nothing here yet.</p>';
+        return;
+    }
+    libraryContent.innerHTML = items.map(function (item) {
+        const time = item.played_at ? `<span class="library-time">${escapeHtml(item.played_at)}</span>` : '';
+        return `<div class="library-row">
+            <span class="library-title">${escapeHtml(item.title)}</span>
+            <span class="library-artist">${escapeHtml(item.artist)}</span>
+            ${time}
+        </div>`;
+    }).join('');
+}
+
+document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        loadLibrary(btn.dataset.tab);
+    });
+});
+
+if (libraryContent) loadLibrary('liked');
+</script>
 {% endblock %}

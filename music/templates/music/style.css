@@ -1,0 +1,21 @@
+.track-row {
+    grid-template-columns: 2.4rem 1.4rem 1fr auto auto;
+}
+
+.track-audio audio {
+    color-scheme: dark;
+    height: 28px;
+    max-width: 180px;
+}
+
+.track-no-audio {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+}
+
+@media (max-width: 600px) {
+    .track-row { grid-template-columns: 1.8rem 1.2rem 1fr; }
+    .track-meta, .track-audio { display: none; }
+}
