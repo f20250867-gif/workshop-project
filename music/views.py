@@ -59,6 +59,12 @@ class ArtistDetailView(DetailView):
     model = Artist
     template_name = 'music/artist_detail.html'
     context_object_name = 'artist'
+
+class MusicDetailView(DetailView):
+    model = Music
+    template_name = 'music/music_detail.html'
+    context_object_name = 'music'
+
 from django.views.decorators.http import require_POST, require_http_methods
 from .models import Artist, Music, Album, RecentlyPlayed
 from django.shortcuts import get_object_or_404
@@ -334,7 +340,8 @@ def follow_unfollow(request, id):
 
     return redirect('artist-detail', pk=artist.id)
 
-
-
-
+class MusicDetailView(DetailView):
+    model = Music
+    template_name = 'music/music_detail.html'
+    context_object_name = 'music'
 
