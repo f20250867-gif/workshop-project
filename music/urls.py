@@ -1,13 +1,14 @@
-from django.contrib.admin import views
-from django.urls import path, include
-from .views import home, SignUpView, CreatePlaylistView, UpdatePlaylistView, DeletePlaylistView, like_song, unlike_song, check_like, liked_songs, play_song, recently_played, ArtistDetailView, follow_unfollow
+from django.urls import path
+from django.contrib.auth.views import LoginView, LogoutView
+from .views import home, SignUpView, CreatePlaylistView, UpdatePlaylistView, DeletePlaylistView, like_song, unlike_song, check_like, liked_songs, play_song, recently_played, ArtistDetailView, MusicDetailView, follow_unfollow
 from .views import upload_song, create_album_view, publisher_dashboard, PlaylistDetailView, create_album, delete_album, create_song, delete_song
 
 
 urlpatterns = [
     path("", home, name="music-home"),
     path("signup/", SignUpView.as_view(), name="signup"),
-    path("accounts/", include("django.contrib.auth.urls")),
+    path("accounts/login/", LoginView.as_view(), name="login"),
+    path("accounts/logout/", LogoutView.as_view(), name="logout"),
 
     path("like/<int:song_id>/", like_song, name="like_song"),
     path("unlike/<int:song_id>/", unlike_song, name="unlike_song"),

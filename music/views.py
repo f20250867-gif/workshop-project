@@ -89,53 +89,6 @@ class MusicDetailView(DetailView):
     template_name = 'music/music_detail.html'
     context_object_name = 'music'
 
-from django.views.decorators.http import require_POST, require_http_methods
-from .models import Artist, Music, Album, RecentlyPlayed
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import login_required
-
-# Create your views here.
-def home(request):
-    music_list = Music.objects.all()
-    if request.method == "GET":
-        music_title = request.GET.get("music")
-        if music_title!= None:
-            music_list = Music.objects.filter(title__icontains=music_title)
-    context = {
-        'music_list': music_list
-    }
-    return render(request, 'music/home.html', context)
-
-
-class CreatePlaylistView(CreateView):
-    model = Playlist
-    fields = ['name', 'description', 'music']
-    template_name = 'music/create_playlist.html'
-    success_url = reverse_lazy('music-home')
-
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
-
-class UpdatePlaylistView(UpdateView):
-    model = Playlist
-    fields = ['name', 'description', 'music']
-    template_name = 'music/update_playlist.html'
-    success_url = reverse_lazy('music-home')
-
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
-
-class DeletePlaylistView(DeleteView):
-    model = Playlist
-    success_url = '/'
-
-class ArtistDetailView(DetailView):
-    model = Artist
-    template_name = 'music/artist_detail.html'
-    context_object_name = 'artist'
-
 @login_required
 @require_POST
 def create_album(request):
@@ -230,23 +183,6 @@ def delete_song(request, song_id):
 
     song.delete()
     return JsonResponse({"message": "Song deleted successfully"}, status=200)
-
-@login_required
-@require_http_methods(["DELETE"])
-def delete_song(request, song_id):
-    try:
-        song = Music.objects.get(id=song_id)
-    except Music.DoesNotExist:
-        return JsonResponse(
-            {"error": "Song not found"},
-            status=404
-        )
-    song.delete()
-
-    return JsonResponse(
-        {"message": "Song deleted successfully"},
-        status=200
-    )
 
 @login_required
 def like_song(request, song_id):
